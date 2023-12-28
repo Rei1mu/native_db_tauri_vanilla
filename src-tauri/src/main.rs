@@ -4,7 +4,7 @@
 use crate::api::Person;
 use native_db::Database;
 use once_cell::sync::Lazy;
-use std::sync::Arc;
+use tauri::Manager;
 
 // Define models for the database / application
 pub(crate) mod api {
@@ -54,7 +54,7 @@ static DATABASE_BUILDER: Lazy<native_db::DatabaseBuilder> = Lazy::new(|| {
 });
 
 #[tauri::command]
-fn save_person(person: Person, db: tauri::State<Arc<Database>>) {
+fn save_person(person: Person, db: tauri::State<Database>) {
     let rw = db
         .rw_transaction()
         .expect("failed to create rw transaction");
@@ -64,7 +64,7 @@ fn save_person(person: Person, db: tauri::State<Arc<Database>>) {
 }
 
 #[tauri::command]
-fn load_people(db: tauri::State<Arc<Database>>) -> Vec<Person> {
+fn load_people(db: tauri::State<Database>) -> Vec<Person> {
     let r = db.r_transaction().expect("failed to create ro transaction");
     let people = r
         .scan()
@@ -81,25 +81,18 @@ fn main() {
         .create_in_memory()
         .expect("failed to create database");
 
-    let db = Arc::new(db);
-
     tauri::Builder::default()
-        .manage(db.clone())
         .setup(move |app| {
-            let local_window =
-                tauri::WindowBuilder::new(app, "local", tauri::WindowUrl::App("index.html".into()))
-                    .build()?;
-            // Different setup for the webview ...
-
             // You can migrate the database here, that can be time consuming.
-            // TODO: I don't know if a good idea regarding my lack of knowledge
-            //       about Tauri.
             let rw = db
                 .rw_transaction()
                 .expect("failed to create rw migration transaction");
             rw.migrate::<Person>().expect("failed to migrate Person");
             rw.commit().expect("failed to commit migration");
 
+            let app_handle = app.handle();
+            // Add the database to the application state
+            app_handle.manage(db);
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![save_person, load_people])

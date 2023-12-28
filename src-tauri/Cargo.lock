@@ -1585,7 +1585,7 @@ dependencies = [
 
 [[package]]
 name = "native_db"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "native_db_macro",
  "native_model",
@@ -1597,7 +1597,7 @@ dependencies = [
 
 [[package]]
 name = "native_db_macro"
-version = "0.5.2"
+version = "0.5.3"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2225,8 +2225,6 @@ checksum = "f2ff9a1f06a88b01621b7ae906ef0211290d1c8a168a15542486a8f61c0833b9"
 [[package]]
 name = "redb"
 version = "1.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "08837f9a129bde83c51953b8c96cbb3422b940166b730caa954836106eb1dfd2"
 dependencies = [
  "libc",
 ]
